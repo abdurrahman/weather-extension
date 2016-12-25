@@ -1,0 +1,184 @@
+/*
+Date   : 24 December 2016
+Author : Abdurrahman Işık
+Web    : www.uykusuzadam.com
+*/
+
+html, body {
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  background: #d35400;
+}
+
+h1,h2,h3,h4,h5,h6,p,a,span {
+  font-family: 'Open Sans', sans-serif;
+}
+
+i.icon, i.wi {
+  font-size: 20px;
+}
+
+.wrapper {
+  position: relative;
+  display: block;
+  width: 500px;
+  margin:0 auto;
+  padding: 0;
+}
+
+.container {
+  position: relative;
+  height: 350px;
+  background: url('../images/san-francisco.jpg') no-repeat center;
+  color: #F7F7F7;
+  display: block;
+  -webkit-animation-name: animatebottom;
+  -webkit-animation-duration: 1s;
+  animation-name: animatebottom;
+  animation-duration: 1s
+}
+
+@-webkit-keyframes animatebottom {
+  from { bottom:-100px; opacity:0 }
+  to { bottom:0px; opacity:1 }
+}
+
+@keyframes animatebottom {
+  from{ bottom:-100px; opacity:0 }
+  to{ bottom:0; opacity:1 }
+}
+
+.weather {
+  float: left;
+  width: 300px;
+  height: 350px;
+  background-color: #273A43;
+  opacity: 0.8;
+}
+
+.weather-date,
+.weather-location,
+.weather-value {
+  margin: 20px;
+  float: left;
+  display: inline;
+}
+
+.weather-location,
+.weather-value {
+  position: absolute;
+}
+
+.weather-value {
+  float: left;
+  left: 10px;
+  top:120px;
+  font-size: 48px;
+  font-weight: 300;
+}
+
+.weather-icon {
+  float: right;
+}
+
+.weather-text {
+  display: inline-block;
+}
+
+.weather-location {
+  left: 10px;
+  top:270px;
+}
+
+.forecast {
+  float: right;
+  width: 200px;
+  height: 350px;
+  font-size: 11px;
+  font-weight: 300;
+  background-color: #3F4345;
+  opacity: 0.7
+}
+
+.forecast ul {
+  list-style-type: none;
+  margin: 20px 0;
+  padding: 0;
+}
+
+.forecast ul > li {
+  border-bottom: 1px dotted #F7F7F7;
+  margin: 10px 20px;
+  padding: 10px 0;
+}
+
+.forecast ul > li:last-child {
+  border:none;
+}
+
+/* Loading Indicators by @tobiasahlin
+  https://github.com/tobiasahlin/SpinKit
+*/
+.sk-cube-grid {
+  width: 40px;
+  height: 40px;
+  margin: 100px auto;
+  z-index: 1;
+}
+
+.sk-cube-grid .sk-cube {
+  width: 33%;
+  height: 33%;
+  background-color: #333;
+  float: left;
+  -webkit-animation: sk-cubeGridScaleDelay 1.3s infinite ease-in-out;
+          animation: sk-cubeGridScaleDelay 1.3s infinite ease-in-out;
+}
+.sk-cube-grid .sk-cube1 {
+  -webkit-animation-delay: 0.2s;
+          animation-delay: 0.2s; }
+.sk-cube-grid .sk-cube2 {
+  -webkit-animation-delay: 0.3s;
+          animation-delay: 0.3s; }
+.sk-cube-grid .sk-cube3 {
+  -webkit-animation-delay: 0.4s;
+          animation-delay: 0.4s; }
+.sk-cube-grid .sk-cube4 {
+  -webkit-animation-delay: 0.1s;
+          animation-delay: 0.1s; }
+.sk-cube-grid .sk-cube5 {
+  -webkit-animation-delay: 0.2s;
+          animation-delay: 0.2s; }
+.sk-cube-grid .sk-cube6 {
+  -webkit-animation-delay: 0.3s;
+          animation-delay: 0.3s; }
+.sk-cube-grid .sk-cube7 {
+  -webkit-animation-delay: 0s;
+          animation-delay: 0s; }
+.sk-cube-grid .sk-cube8 {
+  -webkit-animation-delay: 0.1s;
+          animation-delay: 0.1s; }
+.sk-cube-grid .sk-cube9 {
+  -webkit-animation-delay: 0.2s;
+          animation-delay: 0.2s; }
+
+@-webkit-keyframes sk-cubeGridScaleDelay {
+  0%, 70%, 100% {
+    -webkit-transform: scale3D(1, 1, 1);
+            transform: scale3D(1, 1, 1);
+  } 35% {
+    -webkit-transform: scale3D(0, 0, 1);
+            transform: scale3D(0, 0, 1);
+  }
+}
+
+@keyframes sk-cubeGridScaleDelay {
+  0%, 70%, 100% {
+    -webkit-transform: scale3D(1, 1, 1);
+            transform: scale3D(1, 1, 1);
+  } 35% {
+    -webkit-transform: scale3D(0, 0, 1);
+            transform: scale3D(0, 0, 1);
+  }
+}
