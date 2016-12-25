@@ -19,18 +19,15 @@ $(document).ready(function(){
   // function error(err) {
   //     console.log(err)
   // }
-
-  setTimeout(function(){
-
-    $(".sk-cube-grid").hide();
-    $(".container").show();
-
-  },5000);
+  //
+  // setTimeout(function(){
+  //
+  //
+  // },5000);
 
   $.getJSON('https://geoip-db.com/json/geoip.php?jsonp=?')
      .done (function(location)
      {
-
        var country = location.country_name;
        var state = location.state;
        var city = location.city;
@@ -42,6 +39,8 @@ $(document).ready(function(){
        var location = city + ' - ' + state + ', ' + country;
 
        locationSuccess(location, city);
+       $(".sk-cube-grid").hide();
+       $(".container").show();
      });
 });
 
