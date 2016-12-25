@@ -1,11 +1,46 @@
 <!doctype html>
-<html>
-  <head>
+<html><head>
     <title>Weather Extension</title>
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <!-- CSS Files -->
+    <link rel="stylesheet" type="text/css" href="../css/normalize.css">
+    <link rel="stylesheet" type="text/css" href="http://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link rel="stylesheet" type="text/css" href="../css/popup.css">
+    <!-- Fonts -->
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,700&amp;subset=latin,latin-ext">
   </head>
   <body>
-    <div>Hello world !</div>
-  </body>
+    <div class="wrapper">
+      <div class="container" style="display: block;">
+        <div class="weather">
+          <span class="weather-date"></span>
+          <span class="weather-text"></span>
+          
+          <div class="weather-condition">
+            <span class="weather-value"></span>
+            <span class="weather-icon"></span>
+          </div>
+          <span class="weather-location"><i class="icon ion-location"></i> Montreal</span>
+        </div>
+        <div class="forecast">
+          <ul>
+          </ul>
+        </div>
+      </div>
+      <!-- Loading -->
+      <div class="sk-cube-grid" style="display: none;">
+        <div class="sk-cube sk-cube1"></div>
+        <div class="sk-cube sk-cube2"></div>
+        <div class="sk-cube sk-cube3"></div>
+        <div class="sk-cube sk-cube4"></div>
+        <div class="sk-cube sk-cube5"></div>
+        <div class="sk-cube sk-cube6"></div>
+        <div class="sk-cube sk-cube7"></div>
+        <div class="sk-cube sk-cube8"></div>
+        <div class="sk-cube sk-cube9"></div>
+      </div>
+    </div>
+    <script src="../js/jquery-1.11.0.min.js"></script>
+    <script src="../js/popup.js"></script>
+</body>
 </html>
