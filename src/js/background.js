@@ -1,8 +1,12 @@
-chrome.app.runtime.onLaunched.addListener(function(){
-  chrome.app.window.create('../html/popup.html', {
-    'outerBounds': {
-      'width': 400,
-      'height': 500
-    }
-  });
+// chrome.app.runtime.onLaunched.addListener(function(){
+  // chrome.app.window.create('../html/popup.html', {
+    // 'outerBounds': {
+      // 'width': 500,
+      // 'height': 350
+    // }
+  // });
+// });
+chrome.browserAction.setBadgeText({text: String(15)});
+chrome.browserAction.onClicked.addListener(function(tab){
+	chrome.tabs.create({ url: chrome.extension.getUrl('../html/popup.html')});
 });

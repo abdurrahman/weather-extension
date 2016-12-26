@@ -1,29 +1,35 @@
 {
   "name": "Weather",
+  "description": "Weather result in your browser..",
   "version": "1.0.0",
   "manifest_version": 2,
-  "description": "Weather result in your browser..",
   "icons": {
-    "48": "img/icon48.png",
-    "128": "img/icon128.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
   },
   "background": {
     "scripts": [
       "js/background.js"
-    ]
+    ],
+	"persistent": false
   },
-  "content_security_policy": "script-src 'self' https://ssl.google-analytics.com; object-src 'self'",
+  "content_security_policy": "script-src 'self' https://geoip-db.com https://*.yahooapis.com; object-src 'self'",
+  "content_scripts": [
+	{
+		"matches": [ "<all_urls>"],
+		"css": [ "css/popup.css"],
+		"js": [ "js/jquery-1.11.0.min.js", "js/popup.js" ]
+	}
+  ],
   "browser_action": {
-    "default_icon": { "38": "img/icon38.png" },
+    "default_icon": { "38": "images/icon38.png" },
     "default_title": "Weather",
-    "default_popup": "html/popup.html",
+    "default_popup": "html/popup.html"
   },
-  "options_page": "html/options.html",
   "permissions": [
-    "tabs",
     "alarms",
-    "notifications",
     "storage",
+	"tabs",
     "geolocation"
   ]
 }
