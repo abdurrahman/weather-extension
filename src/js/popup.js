@@ -2,6 +2,8 @@
 $(document).ready(function(){
 
   $(".container").hide();
+  getCurrentLocation();
+  
   // navigator.geolocation.getCurrentPosition(success, error);
   //
   // function success(position) {
@@ -20,31 +22,34 @@ $(document).ready(function(){
   //     console.log(err)
   // }
   //
-  // setTimeout(function(){
-  //
-  //
-  // },5000);
-
-  $.getJSON('https://geoip-db.com/json/geoip.php?jsonp=?')
-     .done (function(location)
-     {
-       var country = location.country_name;
-       var state = location.state;
-       var city = location.city;
-       var postal = location.postal;
-       var latitude = location.latitude;
-       var longitude = location.longitude;
-       var ip = location.IPv4;
-
-       var location = city + ' - ' + state + ', ' + country;
-
-       locationSuccess(location, city);
+   setTimeout(function(){
+         getWeather('istanbul', 'istanbul');
        $(".sk-cube-grid").hide();
        $(".container").show();
-     });
+  
+   },2000);
+
+  // $.getJSON('https://geoip-db.com/json/geoip.php?jsonp=?')
+     // .done (function(location)
+     // {
+       // var country = location.country_name;
+       // var state = location.state;
+       // var city = location.city;
+       // var postal = location.postal;
+       // var latitude = location.latitude;
+       // var longitude = location.longitude;
+       // var ip = location.IPv4;
+
+       // var location = city + ' - ' + state + ', ' + country;
+
+       // getWeather(location, city);
+       // $(".sk-cube-grid").hide();
+       // $(".container").show();
+     // });
+	 
 });
 
-function locationSuccess(position, city) {
+function getWeather(position, city) {
 	//var lat = position.coords.latitude;
 	//var lon = position.coords.longitude;
 
@@ -52,7 +57,7 @@ function locationSuccess(position, city) {
 	// http://developer.yahoo.com/weather/
 
 	var wsql = 'select * from weather.forecast where u="C" and woeid in (select woeid from geo.places(1) where text="' + city + '")',
-		weatherYQL = 'http://query.yahooapis.com/v1/public/yql?q='+encodeURIComponent(wsql)+'&format=json&callback=?';
+		weatherYQL = 'https://query.yahooapis.com/v1/public/yql?q='+encodeURIComponent(wsql)+'&format=json&callback=?';
 
     // Make a weather API request (it is JSONP, so CORS is not an issue):
     $.getJSON(weatherYQL, function(r){
@@ -76,6 +81,14 @@ function locationSuccess(position, city) {
         }
       }
     });
+};
+
+var getCurrentLocation = function(){
+	navigator.geolocation.getCurrentPosition(function(location) {
+		var latitude = location.latitude;
+		var longitude = location.longitude;
+		console.log(location);
+	});
 };
 
 function setWeatherIcon(condid) {

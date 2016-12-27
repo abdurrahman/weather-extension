@@ -4,7 +4,8 @@
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <!-- CSS Files -->
     <link rel="stylesheet" type="text/css" href="../css/normalize.css">
-    <link rel="stylesheet" type="text/css" href="http://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <!-- <link rel="stylesheet" type="text/css" href="http://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css"> -->
+	<link rel="stylesheet" type="text/css" href="../css/ionicons.min.css">
     <link rel="stylesheet" type="text/css" href="../css/weather-icons.min.css" />
     <link rel="stylesheet" type="text/css" href="../css/popup.css">
     <!-- Fonts -->
@@ -12,7 +13,19 @@
   </head>
   <body>
     <div class="wrapper">
-      <div class="container" style="display: block;">
+      <!-- Loading -->
+      <div class="sk-cube-grid">
+        <div class="sk-cube sk-cube1"></div>
+        <div class="sk-cube sk-cube2"></div>
+        <div class="sk-cube sk-cube3"></div>
+        <div class="sk-cube sk-cube4"></div>
+        <div class="sk-cube sk-cube5"></div>
+        <div class="sk-cube sk-cube6"></div>
+        <div class="sk-cube sk-cube7"></div>
+        <div class="sk-cube sk-cube8"></div>
+        <div class="sk-cube sk-cube9"></div>
+      </div>
+      <div class="container">
         <div class="weather">
           <span class="weather-date"></span>
           <span class="weather-text"></span>
@@ -27,18 +40,6 @@
           <ul>
           </ul>
         </div>
-      </div>
-      <!-- Loading -->
-      <div class="sk-cube-grid" style="display: none;">
-        <div class="sk-cube sk-cube1"></div>
-        <div class="sk-cube sk-cube2"></div>
-        <div class="sk-cube sk-cube3"></div>
-        <div class="sk-cube sk-cube4"></div>
-        <div class="sk-cube sk-cube5"></div>
-        <div class="sk-cube sk-cube6"></div>
-        <div class="sk-cube sk-cube7"></div>
-        <div class="sk-cube sk-cube8"></div>
-        <div class="sk-cube sk-cube9"></div>
       </div>
     </div>
     <script src="../js/jquery-1.11.0.min.js"></script>
