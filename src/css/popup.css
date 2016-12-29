@@ -84,6 +84,9 @@ i.icon, i.wi {
 
 .weather-text {
   display: inline-block;
+  position: absolute;
+  left: 10px;
+  top:60px;
 }
 
 .weather-location {

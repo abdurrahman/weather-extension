@@ -9,25 +9,25 @@
   },
   "background": {
     "scripts": [
-	  "js/jquery-1.11.0.min.js", "js/popup.js", 
+      "js/jquery-1.11.0.min.js",
+      "js/popup.js",
       "js/background.js"
     ],
 	"persistent": true
   },
-  "web_accessible_resources": [ "*.png", "*.ttf" ],
-  "content_security_policy": "script-src 'self' https://*.yahooapis.com; object-src 'self'",
+  "web_accessible_resources": [ "*.png" ],
+  "content_security_policy": "script-src 'self' https://geoip-db.com/ https://*.yahooapis.com; object-src 'self'",
   "browser_action": {
     "default_icon": { "38": "images/icon38.png" },
     "default_title": "Weather Extension",
     "default_popup": "html/popup.html"
   },
   "permissions": [
-    "alarms",
     "storage",
-	"tabs",
     "geolocation",
-	"http://*/*",
-	"https://*/*",
-	"http://query.yahooapis.com/"
+  	"http://*/*",
+  	"https://*/*",
+  	"http://query.yahooapis.com/",
+    "https://geoip-db.com/"
   ]
 }

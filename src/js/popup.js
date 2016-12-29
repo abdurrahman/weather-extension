@@ -3,7 +3,7 @@ $(document).ready(function(){
 
   $(".container").hide();
   getCurrentLocation();
-  
+
   // navigator.geolocation.getCurrentPosition(success, error);
   //
   // function success(position) {
@@ -22,31 +22,29 @@ $(document).ready(function(){
   //     console.log(err)
   // }
   //
-   setTimeout(function(){
-         getWeather('istanbul', 'istanbul');
+  //  setTimeout(function(){
+  //        getWeather('istanbul', 'istanbul');
+  //      $(".sk-cube-grid").hide();
+  //      $(".container").show();
+  //  },2000);
+
+  $.getJSON('https://geoip-db.com/json/geoip.php?jsonp=?')
+     .done (function(location) {
+       var country = location.country_name;
+       var state = location.state;
+       var city = location.city;
+       var postal = location.postal;
+       var latitude = location.latitude;
+       var longitude = location.longitude;
+       var ip = location.IPv4;
+
+       var location = city + ' - ' + state + ', ' + country;
+
+       getWeather(location, city);
        $(".sk-cube-grid").hide();
        $(".container").show();
-  
-   },2000);
+     });
 
-  // $.getJSON('https://geoip-db.com/json/geoip.php?jsonp=?')
-     // .done (function(location)
-     // {
-       // var country = location.country_name;
-       // var state = location.state;
-       // var city = location.city;
-       // var postal = location.postal;
-       // var latitude = location.latitude;
-       // var longitude = location.longitude;
-       // var ip = location.IPv4;
-
-       // var location = city + ' - ' + state + ', ' + country;
-
-       // getWeather(location, city);
-       // $(".sk-cube-grid").hide();
-       // $(".container").show();
-     // });
-	 
 });
 
 function getWeather(position, city) {
@@ -73,7 +71,7 @@ function getWeather(position, city) {
         $(".weather-location").html('<i class="icon ion-location"></i> ' + position);
 
         for (var i=0;i< r.query.results.channel.item.forecast.length;i++){
-          if (i == 6) {
+          if (i == 5) {
             break;
           }
           item = r.query.results.channel.item.forecast[i];
@@ -85,10 +83,35 @@ function getWeather(position, city) {
 
 var getCurrentLocation = function(){
 	navigator.geolocation.getCurrentPosition(function(location) {
-		var latitude = location.latitude;
-		var longitude = location.longitude;
+		var latitude = location.coords.latitude;
+		var longitude = location.coords.longitude;
 		console.log(location);
+    return getCityState(latitude, longitude);
 	});
+};
+
+var getCityState = function(latitude, longitude){
+  console.log(latitude + ', '+  longitude);
+  var locationUrl = 'https://maps.googleapis.com/maps/api/geocode/json?sensor=true&latlng=' + latitude + ',' + longitude;
+  $.get(locationUrl, function(data){
+    console.log(data);
+    var state, city;
+    var result = data.results[0];
+    var locationName = 'Unknown location...';
+    if (result && result.address_components) {
+      for (var i = 0; i < result.address_components.length; i++) {
+        var ac = result.address_components[i];
+        if (ac.types.indexOf('locality') >= 0) city = ac.long_name;
+        if (ac.types.indexOf('administrative_area_level_1') >= 0) state = ac.short_name;
+      }
+      locationName = (city ? city : '') + (city && state ? ', ' : '') + (state ? state : '');
+    }else {
+      latitude = 41.0336472;
+      longitude = 28.863523;
+    }
+    console.log(locationName);
+    return locationName;
+  });
 };
 
 function setWeatherIcon(condid) {
