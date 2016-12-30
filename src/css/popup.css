@@ -16,7 +16,7 @@ h1,h2,h3,h4,h5,h6,p,a,span {
 }
 
 i.icon, i.wi {
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .wrapper {
@@ -57,41 +57,44 @@ i.icon, i.wi {
   opacity: 0.8;
 }
 
-.weather-date,
-.weather-location,
-.weather-value {
-  margin: 20px;
-  float: left;
-  display: inline;
+.weather div {
+  padding: 20px;
 }
 
-.weather-location,
-.weather-value {
-  position: absolute;
+.weather div span {
+  display: inline-block;
+  margin: 5px 0;
+}
+
+.weather-condition {
+  display: table;
+}
+.weather-condition div{
+  display: table-cell;
+  vertical-align: middle;
 }
 
 .weather-value {
-  float: left;
-  left: 10px;
-  top:120px;
-  font-size: 48px;
+  /*float: left;*/
+  font-size: 32px;
   font-weight: 300;
 }
 
-.weather-icon {
+/*.weather-icon {
   float: right;
-}
+}*/
 
-.weather-text {
-  display: inline-block;
-  position: absolute;
-  left: 10px;
-  top:60px;
+.weather-icon i.wi {
+  font-size: 85px;
 }
 
 .weather-location {
-  left: 10px;
-  top:270px;
+  position: absolute;
+  bottom: 0;
+}
+
+.weather-location i {
+  font-size: 26px;
 }
 
 .forecast {
