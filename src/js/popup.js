@@ -3,29 +3,9 @@ $(document).ready(function(){
 
   $(".container").hide();
   // var location = getCurrentLocation();
-  // console.log("Ready" + location);
-   setTimeout(function(){
-       getWeather('istanbul', 'istanbul');
-       $(".sk-cube-grid").hide();
-       $(".container").show();
-   },2000);
+  // console.log("Location is : " + location);
 
-  // $.getJSON('https://geoip-db.com/json/geoip.php?jsonp=?')
-  //    .done (function(location) {
-  //      var country = location.country_name;
-  //      var state = location.state;
-  //      var city = location.city;
-  //      var postal = location.postal;
-  //      var latitude = location.latitude;
-  //      var longitude = location.longitude;
-  //      var ip = location.IPv4;
-  //
-  //      var location = city + ' - ' + state + ', ' + country;
-  //
-  //      getWeather(location, city);
-  //      $(".sk-cube-grid").hide();
-  //      $(".container").show();
-  //    });
+  getWeather('New York', 'New York');
 
 });
 
@@ -41,33 +21,43 @@ function getWeather(position, city) {
 
     // Make a weather API request (it is JSONP, so CORS is not an issue):
     $.getJSON(weatherYQL, function(r){
-      console.log(r.query);
       if(r.query.count == 1){
         // Create the weather items in the #scroller UL
 
         var item = r.query.results.channel.item.condition;
+        var weatherIcon = $(setWeatherIcon(item.code)).attr('title', item.text);
+
         $(".weather-date").html('<i class="icon ion-calendar"></i> ' + item.date.replace('\d+$','').replace('EET', ''));
         $(".weather-value").html(item.temp + '° C');
-        $(".weather-icon").html(setWeatherIcon(item.code));
+        $(".weather-icon").html(weatherIcon[0].outerHTML);
         $(".weather-text").html(item.text);
         $(".weather-location").html('<i class="icon ion-location"></i> ' + position);
+        $(".forecast ul").html("");
 
-        for (var i=0;i< r.query.results.channel.item.forecast.length;i++){
-          if (i == 5) {
+        for (var i=0; i < r.query.results.channel.item.forecast.length; i++){
+          if (i == 0)
+            continue;
+          if (i == 6)
             break;
-          }
+
           item = r.query.results.channel.item.forecast[i];
-          console.log(item.day)
-          //$(".forecast ul").append('<li><div>' + item.day + ' <b>' + item.low + ' ° C / '+ item.high +'° C</b><br /><b>' + setWeatherIcon(item.code) + '</b></li>');
+          weatherIcon = $(setWeatherIcon(item.code)).attr('title', item.text);
           $(".forecast ul").append("<li><div>" +
-            "<span><i class='"+setWeatherIcon(item.code)+"' title='" + item.text + "'></i></span>" +
-            // "<span>" + item.day + "</span>" +
-            "<span>Mon</span>" +
-            "<span>" + item.low / item.high + " °C</span>" +
+            "<span>"+ weatherIcon[0].outerHTML + "</span>" +
+            "<span>" + item.day + "</span>" +
+            "<span>" + item.low + " / " + item.high + " °C</span>" +
           "</div></li>")
         }
+          $(".container").show();
       }
-      // console.log("Yahoo Weather API Out of service");
+      else {
+        $(".container").hide();
+        $(".out-of-service").show();
+      }
+      $(".sk-cube-grid").hide();
+    }).done(function(r) {
+      console.log(r.query);
+
     });
 };
 
@@ -75,12 +65,12 @@ var getCurrentLocation = function(){
 	navigator.geolocation.getCurrentPosition(function(location) {
 		var latitude = location.coords.latitude;
 		var longitude = location.coords.longitude;
-    return getCityState(latitude, longitude);
+    var locationName = getCityState(latitude, longitude);
+    return locationName;
 	});
 };
 
 var getCityState = function(latitude, longitude){
-  console.log(latitude + ', '+  longitude);
   var locationUrl = 'https://maps.googleapis.com/maps/api/geocode/json?sensor=true&latlng=' + latitude + ',' + longitude;
   $.get(locationUrl, function(data){
     console.log(data);

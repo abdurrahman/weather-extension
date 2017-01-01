@@ -124,12 +124,21 @@ i.icon, i.wi {
 }
 
 .forecast ul li div span {
-  margin-right: 20px;
+  margin-right: 25px;
   font-size: 15px
 }
 
 .forecast ul li div span:last-child {
   margin-right: 0;
+  float: right;
+}
+
+.out-of-service {
+  margin:0 auto;
+}
+
+.out-of-service span {
+  text-align: center;
 }
 
 /* Loading Indicators by @tobiasahlin
