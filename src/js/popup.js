@@ -2,8 +2,8 @@
 $(document).ready(function(){
 
   $(".container").hide();
-  var location = getCurrentLocation();
-console.log("Ready" + location);
+  // var location = getCurrentLocation();
+  // console.log("Ready" + location);
    setTimeout(function(){
        getWeather('istanbul', 'istanbul');
        $(".sk-cube-grid").hide();
@@ -57,9 +57,17 @@ function getWeather(position, city) {
             break;
           }
           item = r.query.results.channel.item.forecast[i];
-          $(".forecast ul").append('<li>' + item.day + ' <b>' + item.low + ' ° C / '+ item.high +'° C</b><br /><b>' + setWeatherIcon(item.code) + '</b></li>');
+          console.log(item.day)
+          //$(".forecast ul").append('<li><div>' + item.day + ' <b>' + item.low + ' ° C / '+ item.high +'° C</b><br /><b>' + setWeatherIcon(item.code) + '</b></li>');
+          $(".forecast ul").append("<li><div>" +
+            "<span><i class='"+setWeatherIcon(item.code)+"' title='" + item.text + "'></i></span>" +
+            // "<span>" + item.day + "</span>" +
+            "<span>Mon</span>" +
+            "<span>" + item.low / item.high + " °C</span>" +
+          "</div></li>")
         }
       }
+      // console.log("Yahoo Weather API Out of service");
     });
 };
 

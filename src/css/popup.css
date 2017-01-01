@@ -29,7 +29,7 @@ i.icon, i.wi {
 
 .container {
   position: relative;
-  height: 350px;
+  height: 300px;
   background: url('../images/san-francisco.jpg') no-repeat center;
   color: #F7F7F7;
   display: block;
@@ -52,13 +52,13 @@ i.icon, i.wi {
 .weather {
   float: left;
   width: 300px;
-  height: 350px;
+  height: 300px;
   background-color: #273A43;
   opacity: 0.8;
 }
 
 .weather div {
-  padding: 20px;
+  padding: 13px 20px;
 }
 
 .weather div span {
@@ -100,7 +100,7 @@ i.icon, i.wi {
 .forecast {
   float: right;
   width: 200px;
-  height: 350px;
+  height: 300px;
   font-size: 11px;
   font-weight: 300;
   background-color: #3F4345;
@@ -115,12 +115,21 @@ i.icon, i.wi {
 
 .forecast ul > li {
   border-bottom: 1px dotted #F7F7F7;
-  margin: 10px 20px;
-  padding: 10px 0;
+  margin: 0px 20px;
+  padding: 16px 0;
 }
 
 .forecast ul > li:last-child {
   border:none;
+}
+
+.forecast ul li div span {
+  margin-right: 20px;
+  font-size: 15px
+}
+
+.forecast ul li div span:last-child {
+  margin-right: 0;
 }
 
 /* Loading Indicators by @tobiasahlin
