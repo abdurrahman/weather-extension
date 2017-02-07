@@ -1,11 +1,16 @@
 
 $(document).ready(function(){
 
-  $(".container").hide();
+   $(".container").hide();
   // var location = getCurrentLocation();
   // console.log("Location is : " + location);
+  //getWeather('New York', 'New York');
 
-  getWeather('New York', 'New York');
+  setTimeout(function(){
+    $(".sk-cube-grid").hide();
+    // $(".container").show();
+    $(".out-of-service").show();
+  },3000);
 
 });
 
