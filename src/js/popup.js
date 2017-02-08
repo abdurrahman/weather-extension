@@ -1,69 +1,143 @@
 
 $(document).ready(function(){
-
    $(".container").hide();
   // var location = getCurrentLocation();
   // console.log("Location is : " + location);
-  //getWeather('New York', 'New York');
+  navigator.geolocation.getCurrentPosition(function(location) {
+		var latitude = location.coords.latitude;
+		var longitude = location.coords.longitude;
+    //var locationName = getCityState(latitude, longitude);
+    //return locationName;
+    updateBadge(location);
+    getWeather(location, 'New York');
+	});
 
-  setTimeout(function(){
-    $(".sk-cube-grid").hide();
-    // $(".container").show();
-    $(".out-of-service").show();
-  },3000);
+  // setTimeout(function(){
+  //   $(".sk-cube-grid").hide();
+  //   // $(".container").show();
+  //   $(".out-of-service").show();
+  // },3000);
 
 });
 
+function updateBadge(position) {
+
+	var lat = position.coords.latitude;
+	var lon = position.coords.longitude;
+
+  var baseApiUri = "https://api.darksky.net/forecast/";
+  var apiKey = "65add8d78a15cb6f9b38a2065fadbe4f";
+  var coords = lat + "," + lon;
+
+  $.ajax({
+    type: "GET",
+    url: baseApiUri + apiKey + "/" + coords,
+    contentType: "application/json; charset=utf-8",
+    dataType: "json",
+    success: function(result){
+      chrome.browserAction.setBadgeText({
+        text: result.currently.temperature.toString()
+      });
+    }
+  });
+}
+
 function getWeather(position, city) {
-	//var lat = position.coords.latitude;
-	//var lon = position.coords.longitude;
+	var lat = position.coords.latitude;
+	var lon = position.coords.longitude;
 
-	// Forming the query for Yahoo's weather forecasting API with YQL
-	// http://developer.yahoo.com/weather/
+	// Forming the query for Dark Sky weather forecasting API
+  // https://api.darksky.net/forecast/[key]/[latitude],[longitude]
+  var baseApiUri = "https://api.darksky.net/forecast/";
+  var apiKey = "65add8d78a15cb6f9b38a2065fadbe4f";
+  var coords = lat + "," + lon;
 
-	var wsql = 'select * from weather.forecast where u="C" and woeid in (select woeid from geo.places(1) where text="' + city + '")',
-		weatherYQL = 'https://query.yahooapis.com/v1/public/yql?q='+encodeURIComponent(wsql)+'&format=json&callback=?';
+  $.ajax({
+    type: "GET",
+    url: baseApiUri + apiKey + "/" + coords,
+    contentType: "application/json; charset=utf-8",
+    dataType: "json",
+    beforeSend: function(){
+      $(".sk-cube-grid").show();
+    },
+    success: function(result){
+      console.log(result);
+      var item = result.currently;
+      var weatherIcon = $(getWeatherIcon(item.icon)).attr('title', item.summary);
+      // console.log(weatherIcon[0].outerHTML);
+      var date = new Date();
+      $(".weather-date").html('<i class="icon ion-calendar"></i> ' + date.getDate() + ' ' + date.getMonth() + '' + date.getFullYear());
+      $(".weather-value").html(item.temperature + '° C');
+      $(".weather-icon").html(weatherIcon[0].outerHTML);
+      $(".weather-text").html(item.summary);
+      $(".weather-location").html('<i class="icon ion-location"></i> ' + item.timezone);
+      $(".forecast ul").html("");
 
-    // Make a weather API request (it is JSONP, so CORS is not an issue):
-    $.getJSON(weatherYQL, function(r){
-      if(r.query.count == 1){
-        // Create the weather items in the #scroller UL
+      // for (var i=0; i < r.query.results.channel.item.forecast.length; i++){
+      //   if (i == 0)
+      //     continue;
+      //   if (i == 6)
+      //     break;
+      //
+      //   item = r.query.results.channel.item.forecast[i];
+      //   weatherIcon = $(setWeatherIcon(item.code)).attr('title', item.text);
+      //   $(".forecast ul").append("<li><div>" +
+      //     "<span>"+ weatherIcon[0].outerHTML + "</span>" +
+      //     "<span>" + item.day + "</span>" +
+      //     "<span>" + item.low + " / " + item.high + " °C</span>" +
+      //   "</div></li>")
+      // }
 
-        var item = r.query.results.channel.item.condition;
-        var weatherIcon = $(setWeatherIcon(item.code)).attr('title', item.text);
-
-        $(".weather-date").html('<i class="icon ion-calendar"></i> ' + item.date.replace('\d+$','').replace('EET', ''));
-        $(".weather-value").html(item.temp + '° C');
-        $(".weather-icon").html(weatherIcon[0].outerHTML);
-        $(".weather-text").html(item.text);
-        $(".weather-location").html('<i class="icon ion-location"></i> ' + position);
-        $(".forecast ul").html("");
-
-        for (var i=0; i < r.query.results.channel.item.forecast.length; i++){
-          if (i == 0)
-            continue;
-          if (i == 6)
-            break;
-
-          item = r.query.results.channel.item.forecast[i];
-          weatherIcon = $(setWeatherIcon(item.code)).attr('title', item.text);
-          $(".forecast ul").append("<li><div>" +
-            "<span>"+ weatherIcon[0].outerHTML + "</span>" +
-            "<span>" + item.day + "</span>" +
-            "<span>" + item.low + " / " + item.high + " °C</span>" +
-          "</div></li>")
-        }
-          $(".container").show();
-      }
-      else {
-        $(".container").hide();
-        $(".out-of-service").show();
-      }
+    },
+    complete: function(){
       $(".sk-cube-grid").hide();
-    }).done(function(r) {
-      console.log(r.query);
+      $(".container").show();
+    }
+  });
 
-    });
+	// var wsql = 'select * from weather.forecast where u="C" and woeid in (select woeid from geo.places(1) where text="' + city + '")',
+	// 	weatherYQL = 'https://query.yahooapis.com/v1/public/yql?q='+encodeURIComponent(wsql)+'&format=json&callback=?';
+  //
+  //   // Make a weather API request (it is JSONP, so CORS is not an issue):
+  //   $.getJSON(weatherYQL, function(r){
+  //     if(r.query.count == 1){
+  //       // Create the weather items in the #scroller UL
+  //
+  //       var item = r.query.results.channel.item.condition;
+  //       var weatherIcon = $(setWeatherIcon(item.code)).attr('title', item.text);
+  //
+  //       $(".weather-date").html('<i class="icon ion-calendar"></i> ' + item.date.replace('\d+$','').replace('EET', ''));
+  //       $(".weather-value").html(item.temp + '° C');
+  //       $(".weather-icon").html(weatherIcon[0].outerHTML);
+  //       $(".weather-text").html(item.text);
+  //       $(".weather-location").html('<i class="icon ion-location"></i> ' + position);
+  //       $(".forecast ul").html("");
+  //
+  //       for (var i=0; i < r.query.results.channel.item.forecast.length; i++){
+  //         if (i == 0)
+  //           continue;
+  //         if (i == 6)
+  //           break;
+  //
+  //         item = r.query.results.channel.item.forecast[i];
+  //         weatherIcon = $(setWeatherIcon(item.code)).attr('title', item.text);
+  //         $(".forecast ul").append("<li><div>" +
+  //           "<span>"+ weatherIcon[0].outerHTML + "</span>" +
+  //           "<span>" + item.day + "</span>" +
+  //           "<span>" + item.low + " / " + item.high + " °C</span>" +
+  //         "</div></li>")
+  //       }
+  //         $(".container").show();
+  //     }
+  //     else {
+  //       $(".container").hide();
+  //       $(".out-of-service").show();
+  //     }
+  //     $(".sk-cube-grid").hide();
+  //   }).done(function(r) {
+  //     console.log(r.query);
+  //
+  //   });
 };
 
 var getCurrentLocation = function(){
@@ -97,6 +171,52 @@ var getCityState = function(latitude, longitude){
     return locationName;
   });
 };
+
+function getWeatherIcon(iconText){
+  var icon = "";
+  switch(iconText) {
+    case 'clear-day':
+      icon = '<i class="wi wi-day-sunny"></i>';
+    break;
+    case 'clear-night':
+      icon = '<i class="wi wi-night-clear"></i>';
+    break;
+    case 'rain':
+      icon = '<i class="wi wi-rain"></i>';
+    break;
+    case 'snow':
+      icon = '<i class="wi wi-snow"></i>';
+    break;
+    case 'sleet':
+      icon = '<i class="wi wi-sleet"></i>';
+    break;
+    case 'wind':
+      icon = '<i class="wi wi-windy"></i>';
+    break;
+    case 'fog':
+      icon = '<i class="wi wi-fog"></i>';
+    break;
+    case 'cloudy':
+      icon = '<i class="wi wi-cloudy"></i>';
+    break;
+    case 'partly-cloudy-day':
+      icon = '<i class="wi wi-day-cloudy"></i>';
+    break;
+    case 'partly-cloudy-night':
+      icon = '<i class="wi-night-partly-cloudy"></i>';
+    break;
+    case 'hail':
+      icon = '<i class="wi wi-hail"></i>';
+    break;
+    case 'tornado':
+      icon = '<i class="wi wi-tornado"></i>';
+    break;
+    case 'thunderstorm':
+      icon = '<i class="wi wi-thunderstorm"></i>';
+    break;
+  }
+  return icon;
+}
 
 function setWeatherIcon(condid) {
 

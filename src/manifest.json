@@ -16,7 +16,7 @@
 	"persistent": true
   },
   "web_accessible_resources": [ "*.png" ],
-  "content_security_policy": "script-src 'self' https://geoip-db.com/ https://*.yahooapis.com; object-src 'self'",
+  "content_security_policy": "script-src 'self'  object-src 'self'",
   "browser_action": {
     "default_icon": { "38": "images/icon38.png" },
     "default_title": "Weather Extension",
@@ -27,7 +27,7 @@
     "geolocation",
   	"http://*/*",
   	"https://*/*",
-  	"http://query.yahooapis.com/",
-    "https://geoip-db.com/"
+    "cookies",
+    "*://*.google.com"
   ]
 }
