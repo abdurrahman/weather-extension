@@ -66,6 +66,10 @@ i.icon, i.wi {
   margin: 5px 0;
 }
 
+..weather-date {
+  font-size: 17px;
+}
+
 .weather-condition {
   display: table;
 }
@@ -91,6 +95,7 @@ i.icon, i.wi {
 .weather-location {
   position: absolute;
   bottom: 0;
+  font-size: 18px
 }
 
 .weather-location i {

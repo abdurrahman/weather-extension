@@ -32,11 +32,16 @@ function updateBadge(position) {
   $.ajax({
     type: "GET",
     url: baseApiUri + apiKey + "/" + coords,
+    headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+    },
     contentType: "application/json; charset=utf-8",
-    dataType: "json",
+    dataType: "jsonp",
     success: function(result){
+      var temperature = celsiusFromFahrenheit(result.currently.temperature);
+      console.log(temperature);
       chrome.browserAction.setBadgeText({
-        text: result.currently.temperature.toString()
+        text: temperature.toString()
       });
     }
   });
@@ -62,31 +67,36 @@ function getWeather(position, city) {
     },
     success: function(result){
       console.log(result);
-      var item = result.currently;
-      var weatherIcon = $(getWeatherIcon(item.icon)).attr('title', item.summary);
+
+      var currentWeather = result.currently;
+      var weatherIcon = $(getWeatherIcon(currentWeather.icon)).attr('title', currentWeather.summary);
       // console.log(weatherIcon[0].outerHTML);
-      var date = new Date();
-      $(".weather-date").html('<i class="icon ion-calendar"></i> ' + date.getDate() + ' ' + date.getMonth() + '' + date.getFullYear());
-      $(".weather-value").html(item.temperature + '° C');
+      var currentDate = convertDateFromTimestamp(currentWeather.time);
+
+      $(".weather-date").html('<i class="icon ion-calendar"></i> ' + currentDate.toDateString());
+      $(".weather-value").html(celsiusFromFahrenheit(currentWeather.temperature) + '° C');
       $(".weather-icon").html(weatherIcon[0].outerHTML);
-      $(".weather-text").html(item.summary);
-      $(".weather-location").html('<i class="icon ion-location"></i> ' + item.timezone);
+      $(".weather-text").html(currentWeather.summary);
+      $(".weather-location").html('<i class="icon ion-location"></i> ' + result.timezone);
       $(".forecast ul").html("");
 
-      // for (var i=0; i < r.query.results.channel.item.forecast.length; i++){
-      //   if (i == 0)
-      //     continue;
-      //   if (i == 6)
-      //     break;
-      //
-      //   item = r.query.results.channel.item.forecast[i];
-      //   weatherIcon = $(setWeatherIcon(item.code)).attr('title', item.text);
-      //   $(".forecast ul").append("<li><div>" +
-      //     "<span>"+ weatherIcon[0].outerHTML + "</span>" +
-      //     "<span>" + item.day + "</span>" +
-      //     "<span>" + item.low + " / " + item.high + " °C</span>" +
-      //   "</div></li>")
-      // }
+      var forecastWeathers = result.daily.data;
+      for (var i=0; i < forecastWeathers.length; i++){
+        if (i == 0)
+          continue;
+        if (i == 6)
+          break;
+
+        var forecastWeather = forecastWeathers[i];
+        var forecastDate = convertDateFromTimestamp(forecastWeather.time);
+        var forecastDay= getDayName(forecastDate);
+        weatherIcon = $(setWeatherIcon(forecastWeather.icon)).attr('title', forecastWeather.summary);
+        $(".forecast ul").append("<li><div>" +
+          "<span>"+ weatherIcon[0].outerHTML + "</span>" +
+          "<span>" + forecastDay + "</span>" +
+          "<span>" + celsiusFromFahrenheit(forecastWeather.temperatureMin) + " / " + celsiusFromFahrenheit(forecastWeather.temperatureMax) + " °C</span>" +
+        "</div></li>")
+      }
 
     },
     complete: function(){
@@ -94,57 +104,16 @@ function getWeather(position, city) {
       $(".container").show();
     }
   });
-
-	// var wsql = 'select * from weather.forecast where u="C" and woeid in (select woeid from geo.places(1) where text="' + city + '")',
-	// 	weatherYQL = 'https://query.yahooapis.com/v1/public/yql?q='+encodeURIComponent(wsql)+'&format=json&callback=?';
-  //
-  //   // Make a weather API request (it is JSONP, so CORS is not an issue):
-  //   $.getJSON(weatherYQL, function(r){
-  //     if(r.query.count == 1){
-  //       // Create the weather items in the #scroller UL
-  //
-  //       var item = r.query.results.channel.item.condition;
-  //       var weatherIcon = $(setWeatherIcon(item.code)).attr('title', item.text);
-  //
-  //       $(".weather-date").html('<i class="icon ion-calendar"></i> ' + item.date.replace('\d+$','').replace('EET', ''));
-  //       $(".weather-value").html(item.temp + '° C');
-  //       $(".weather-icon").html(weatherIcon[0].outerHTML);
-  //       $(".weather-text").html(item.text);
-  //       $(".weather-location").html('<i class="icon ion-location"></i> ' + position);
-  //       $(".forecast ul").html("");
-  //
-  //       for (var i=0; i < r.query.results.channel.item.forecast.length; i++){
-  //         if (i == 0)
-  //           continue;
-  //         if (i == 6)
-  //           break;
-  //
-  //         item = r.query.results.channel.item.forecast[i];
-  //         weatherIcon = $(setWeatherIcon(item.code)).attr('title', item.text);
-  //         $(".forecast ul").append("<li><div>" +
-  //           "<span>"+ weatherIcon[0].outerHTML + "</span>" +
-  //           "<span>" + item.day + "</span>" +
-  //           "<span>" + item.low + " / " + item.high + " °C</span>" +
-  //         "</div></li>")
-  //       }
-  //         $(".container").show();
-  //     }
-  //     else {
-  //       $(".container").hide();
-  //       $(".out-of-service").show();
-  //     }
-  //     $(".sk-cube-grid").hide();
-  //   }).done(function(r) {
-  //     console.log(r.query);
-  //
-  //   });
 };
+
+
 
 var getCurrentLocation = function(){
 	navigator.geolocation.getCurrentPosition(function(location) {
 		var latitude = location.coords.latitude;
 		var longitude = location.coords.longitude;
     var locationName = getCityState(latitude, longitude);
+    console.log(locationName);
     return locationName;
 	});
 };
@@ -171,6 +140,25 @@ var getCityState = function(latitude, longitude){
     return locationName;
   });
 };
+
+function convertDateFromTimestamp(timestamp)
+{
+  var date = new Date(timestamp * 1000);
+  return date;
+}
+
+function getDayName(date)
+{
+  var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var day = days[ date.getDay() ];
+  return day;
+}
+
+function celsiusFromFahrenheit(fahrenheit)
+{
+    var c = Math.round((Number(fahrenheit) - 32.0) * 5.0/9.0) // convert to Celsius
+    return c;
+}
 
 function getWeatherIcon(iconText){
   var icon = "";

@@ -15,8 +15,7 @@
     ],
 	"persistent": true
   },
-  "web_accessible_resources": [ "*.png" ],
-  "content_security_policy": "script-src 'self'  object-src 'self'",
+  "content_security_policy": "script-src 'self' https://ssl.google-analytics.com https://api.darksky.net/; object-src 'self'",
   "browser_action": {
     "default_icon": { "38": "images/icon38.png" },
     "default_title": "Weather Extension",
@@ -27,7 +26,6 @@
     "geolocation",
   	"http://*/*",
   	"https://*/*",
-    "cookies",
-    "*://*.google.com"
+    "cookies"
   ]
 }
