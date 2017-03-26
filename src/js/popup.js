@@ -1,8 +1,9 @@
 
 $(document).ready(function(){
    $(".container").hide();
-  // var location = getCurrentLocation();
-  // console.log("Location is : " + location);
+   var location = getCurrentLocation();
+  console.log("Location is : " + location);
+
   navigator.geolocation.getCurrentPosition(function(location) {
 		var latitude = location.coords.latitude;
 		var longitude = location.coords.longitude;
@@ -29,102 +30,180 @@ function updateBadge(position) {
   var apiKey = "65add8d78a15cb6f9b38a2065fadbe4f";
   var coords = lat + "," + lon;
 
-  $.ajax({
-    type: "GET",
-    url: baseApiUri + apiKey + "/" + coords,
-    headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    contentType: "application/json; charset=utf-8",
-    dataType: "jsonp",
-    success: function(result){
-      var temperature = celsiusFromFahrenheit(result.currently.temperature);
-      console.log(temperature);
-      chrome.browserAction.setBadgeText({
-        text: temperature.toString()
-      });
-    }
-  });
+  getCookie("temperature", function(temperatureCookie) {
+  //  alert(temperatureCookie);
+  //  return temperatureCookie;
+  // console.log(temperatureCookie);
+
+   if (temperatureCookie !== undefined) {
+    //  console.log("Get cookie : " + temperatureCookie);
+     chrome.browserAction.setBadgeText({
+       text: temperatureCookie.toString()
+     });
+   }
+   else {
+     $.ajax({
+       type: "GET",
+       url: baseApiUri + apiKey + "/" + coords,
+       headers: {
+           'Content-Type': 'application/x-www-form-urlencoded'
+       },
+       contentType: "application/json; charset=utf-8",
+       dataType: "jsonp",
+       success: function(result){
+         var temperature = celsiusFromFahrenheit(result.currently.temperature);
+         // console.log(temperature);
+         setCookie("temperature", temperature.toString(), 3600);
+         chrome.browserAction.setBadgeText({
+           text: temperature.toString()
+         });
+       }
+     });
+   }
+
+ });
 }
 
 function getWeather(position, city) {
-	var lat = position.coords.latitude;
-	var lon = position.coords.longitude;
 
-	// Forming the query for Dark Sky weather forecasting API
-  // https://api.darksky.net/forecast/[key]/[latitude],[longitude]
-  var baseApiUri = "https://api.darksky.net/forecast/";
-  var apiKey = "65add8d78a15cb6f9b38a2065fadbe4f";
-  var coords = lat + "," + lon;
+    // var forecastDailyCookie = getCookie("forecastDaily");
+    // if (forecastDailyCookie !== undefined) {
+    //   console.log("Get forecast value from cookie" + JSON.stringify(forecastDailyCookie));
+    // }
+    // var forecastCurrentlyCookie = getCookie("forecastCurrently");
+    // if (forecastCurrentlyCookie !== undefined) {
+    //   console.log("Get forecast value from cookie" + JSON.stringify(forecastCurrentlyCookie));
+    // }
+  getCookie("forecast", function(forecastCookie) {
+    console.log("Get cookie : " + forecastCookie);
+    if(forecastCookie !== undefined && forecastCookie !== null)
+    {
+      // console.log("Get cookie value :" + JSON.parse(forecastCookie));
+      prepareDOM(JSON.parse(forecastCookie));
 
-  $.ajax({
-    type: "GET",
-    url: baseApiUri + apiKey + "/" + coords,
-    contentType: "application/json; charset=utf-8",
-    dataType: "json",
-    beforeSend: function(){
-      $(".sk-cube-grid").show();
-    },
-    success: function(result){
-      console.log(result);
-
-      var currentWeather = result.currently;
-      var weatherIcon = $(getWeatherIcon(currentWeather.icon)).attr('title', currentWeather.summary);
-      // console.log(weatherIcon[0].outerHTML);
-      var currentDate = convertDateFromTimestamp(currentWeather.time);
-
-      $(".weather-date").html('<i class="icon ion-calendar"></i> ' + currentDate.toDateString());
-      $(".weather-value").html(celsiusFromFahrenheit(currentWeather.temperature) + '° C');
-      $(".weather-icon").html(weatherIcon[0].outerHTML);
-      $(".weather-text").html(currentWeather.summary);
-      $(".weather-location").html('<i class="icon ion-location"></i> ' + result.timezone);
-      $(".forecast ul").html("");
-
-      var forecastWeathers = result.daily.data;
-      for (var i=0; i < forecastWeathers.length; i++){
-        if (i == 0)
-          continue;
-        if (i == 6)
-          break;
-
-        var forecastWeather = forecastWeathers[i];
-        var forecastDate = convertDateFromTimestamp(forecastWeather.time);
-        var forecastDay= getDayName(forecastDate);
-        weatherIcon = $(setWeatherIcon(forecastWeather.icon)).attr('title', forecastWeather.summary);
-        $(".forecast ul").append("<li><div>" +
-          "<span>"+ weatherIcon[0].outerHTML + "</span>" +
-          "<span>" + forecastDay + "</span>" +
-          "<span>" + celsiusFromFahrenheit(forecastWeather.temperatureMin) + " / " + celsiusFromFahrenheit(forecastWeather.temperatureMax) + " °C</span>" +
-        "</div></li>")
-      }
-
-    },
-    complete: function(){
       $(".sk-cube-grid").hide();
       $(".container").show();
     }
-  });
+    else {
+      var lat = position.coords.latitude;
+      var lon = position.coords.longitude;
+
+      // Forming the query for Dark Sky weather forecasting API
+      // https://api.darksky.net/forecast/[key]/[latitude],[longitude]
+      var baseApiUri = "https://api.darksky.net/forecast/";
+      var apiKey = "65add8d78a15cb6f9b38a2065fadbe4f";
+      var coords = lat + "," + lon;
+
+      $.ajax({
+        type: "GET",
+        url: baseApiUri + apiKey + "/" + coords,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        beforeSend: function(){
+          $(".sk-cube-grid").show();
+        },
+        success: function(result){
+          // console.log(result);
+          setCookie("forecast", JSON.stringify(result), 3600);
+          prepareDOM(result);
+        },
+        complete: function(){
+          $(".sk-cube-grid").hide();
+          $(".container").show();
+        }
+      });
+
+    }
+  })
 };
 
+var prepareDOM = function (result) {
+  var currentWeather = result.currently;
+  var weatherIcon = $(getWeatherIcon(currentWeather.icon)).attr('title', currentWeather.summary);
+  // console.log(weatherIcon[0].outerHTML);
+  var currentDate = convertDateFromTimestamp(currentWeather.time);
 
+  $(".weather-date").html('<i class="icon ion-calendar"></i> ' + currentDate.toDateString());
+  $(".weather-value").html(celsiusFromFahrenheit(currentWeather.temperature) + '° C');
+  $(".weather-icon").html(weatherIcon[0].outerHTML);
+  $(".weather-text").html(currentWeather.summary);
+  $(".weather-location").html('<i class="icon ion-location"></i> ' + result.timezone);
+  $(".forecast ul").html("");
 
-var getCurrentLocation = function(){
+  var forecastWeathers = result.daily.data;
+  for (var i=0; i < forecastWeathers.length; i++){
+    if (i == 0)
+      continue;
+    if (i == 6)
+      break;
+
+    var forecastWeather = forecastWeathers[i];
+    var forecastDate = convertDateFromTimestamp(forecastWeather.time);
+    var forecastDay= getDayName(forecastDate);
+    weatherIcon = $(setWeatherIcon(forecastWeather.icon)).attr('title', forecastWeather.summary);
+    $(".forecast ul").append("<li><div>" +
+      "<span>"+ weatherIcon[0].outerHTML + "</span>" +
+      "<span>" + forecastDay + "</span>" +
+      "<span>" + celsiusFromFahrenheit(forecastWeather.temperatureMin) + " / " + celsiusFromFahrenheit(forecastWeather.temperatureMax) + " °C</span>" +
+    "</div></li>")
+  }
+}
+
+var setCookie = function (key, value, expiration) {
+  chrome.cookies.set({
+    "name" : key,
+    "url" : "http://developer.chrome.com/extensions/cookies.html",
+    "value": value,
+    // "expirationDate": expiration
+  }, function (cookie) {
+    console.log("Set cookie key :" + key + " - value :" + JSON.stringify(cookie));
+    // console.log(chrome.extension.lastError);
+    // console.log(chrome.runtime.lastError);
+  });
+}
+var getCookie = function (key, callback) {
+
+  // var getCookieValue= "";
+   chrome.cookies.get({
+    "name": key,
+    "url" : "http://developer.chrome.com/extensions/cookies.html",
+  }, function (cookie) {
+    if (callback) {
+      if (cookie == null)
+        callback(undefined);
+      else
+        callback(cookie.value);
+    }
+    // console.log(cookie.value);
+    // // console.log("Get cookie value :" + JSON.stringify(cookie));
+    // getCookieValue = cookie;
+    // return cookie;
+  })
+  // console.log("" + getCookieValue);
+  // return getCookieValue;
+}
+
+var getCurrentLocation = function () {
+  var locationName = "";
 	navigator.geolocation.getCurrentPosition(function(location) {
 		var latitude = location.coords.latitude;
 		var longitude = location.coords.longitude;
-    var locationName = getCityState(latitude, longitude);
-    console.log(locationName);
-    return locationName;
+   locationName = getCityState(latitude, longitude);
+    // console.log(locationName);
+    // return locationName;
 	});
+  return locationName;
 };
 
 var getCityState = function(latitude, longitude){
   var locationUrl = 'https://maps.googleapis.com/maps/api/geocode/json?sensor=true&latlng=' + latitude + ',' + longitude;
-  $.get(locationUrl, function(data){
-    console.log(data);
+
+  var locationName = 'Unknown location...';
+  $.get(locationUrl, function(data) {
+    // console.log(data);
     var state, city;
     var result = data.results[0];
-    var locationName = 'Unknown location...';
+
     if (result && result.address_components) {
       for (var i = 0; i < result.address_components.length; i++) {
         var ac = result.address_components[i];
@@ -132,13 +211,12 @@ var getCityState = function(latitude, longitude){
         if (ac.types.indexOf('administrative_area_level_1') >= 0) state = ac.short_name;
       }
       locationName = (city ? city : '') + (city && state ? ', ' : '') + (state ? state : '');
-    }else {
+    } else {
       latitude = 41.0336472;
       longitude = 28.863523;
     }
-    console.log(locationName);
-    return locationName;
   });
+  return locationName;
 };
 
 function convertDateFromTimestamp(timestamp)
@@ -305,9 +383,9 @@ function setWeatherIcon(condid) {
     break;
     case '47': var icon  = '<i class="wi wi-thunderstorm"></i>';
     break;
-    case '3200': var icon  =  '<i class="wi wi-cloud"></i>';
+    case '3200': icon  =  '<i class="wi wi-cloud"></i>';
     break;
-    default: var icon  =  '<i class="wi wi-cloud"></i>';
+    default: icon  =  '<i class="wi wi-cloud"></i>';
     break;
   }
 
