@@ -1,17 +1,14 @@
-
-$(document).ready(function(){
+$(document).ready(function() {
    $(".container").hide();
-   var location = getCurrentLocation();
-  console.log("Location is : " + location);
+   //
+   getCurrentLocation(function(value) {
+     if (!value) throw err
 
-  navigator.geolocation.getCurrentPosition(function(location) {
-		var latitude = location.coords.latitude;
-		var longitude = location.coords.longitude;
-    //var locationName = getCityState(latitude, longitude);
-    //return locationName;
-    updateBadge(location);
-    getWeather(location, 'New York');
-	});
+     if (value) {
+       updateBadge(value)
+       getWeather(value, 'New York');
+     }
+   })
 
   // setTimeout(function(){
   //   $(".sk-cube-grid").hide();
@@ -30,27 +27,21 @@ function updateBadge(position) {
   var apiKey = "65add8d78a15cb6f9b38a2065fadbe4f";
   var coords = lat + "," + lon;
 
-  getCookie("temperature", function(temperatureCookie) {
-  //  alert(temperatureCookie);
-  //  return temperatureCookie;
-  // console.log(temperatureCookie);
-
-   if (temperatureCookie !== undefined) {
-    //  console.log("Get cookie : " + temperatureCookie);
-     chrome.browserAction.setBadgeText({
-       text: temperatureCookie.toString()
-     });
-   }
-   else {
-     $.ajax({
-       type: "GET",
-       url: baseApiUri + apiKey + "/" + coords,
-       headers: {
+  getCookie("temperature", function(error, value) {
+    if (value) {
+      chrome.browserAction.setBadgeText({
+        text: value.toString()
+      });
+    } else {
+      $.ajax({
+        type: "GET",
+        url: baseApiUri + apiKey + "/" + coords,
+        headers: {
            'Content-Type': 'application/x-www-form-urlencoded'
-       },
+         },
        contentType: "application/json; charset=utf-8",
        dataType: "jsonp",
-       success: function(result){
+       success: function(result) {
          var temperature = celsiusFromFahrenheit(result.currently.temperature);
          // console.log(temperature);
          setCookie("temperature", temperature.toString(), 3600);
@@ -60,33 +51,30 @@ function updateBadge(position) {
        }
      });
    }
-
  });
 }
 
 function getWeather(position, city) {
 
-    // var forecastDailyCookie = getCookie("forecastDaily");
-    // if (forecastDailyCookie !== undefined) {
-    //   console.log("Get forecast value from cookie" + JSON.stringify(forecastDailyCookie));
-    // }
-    // var forecastCurrentlyCookie = getCookie("forecastCurrently");
-    // if (forecastCurrentlyCookie !== undefined) {
-    //   console.log("Get forecast value from cookie" + JSON.stringify(forecastCurrentlyCookie));
-    // }
-  getCookie("forecast", function(forecastCookie) {
-    console.log("Get cookie : " + forecastCookie);
-    if(forecastCookie !== undefined && forecastCookie !== null)
+    var lat = position.coords.latitude;
+    var lon = position.coords.longitude;
+
+  getCookie("forecast", function(error, value) {
+    console.log("Get cookie : " + value);
+    console.log("Value" + !value);
+
+    if(value !== undefined && value !== null)
     {
       // console.log("Get cookie value :" + JSON.parse(forecastCookie));
-      prepareDOM(JSON.parse(forecastCookie));
+      prepareDOM(JSON.parse(value));
 
+      getCityState(lat, lon, function (value) {
+        $(".weather-location").html('<i class="icon ion-location"></i> ' + value);
+      })
       $(".sk-cube-grid").hide();
       $(".container").show();
     }
     else {
-      var lat = position.coords.latitude;
-      var lon = position.coords.longitude;
 
       // Forming the query for Dark Sky weather forecasting API
       // https://api.darksky.net/forecast/[key]/[latitude],[longitude]
@@ -105,6 +93,11 @@ function getWeather(position, city) {
         success: function(result){
           // console.log(result);
           setCookie("forecast", JSON.stringify(result), 3600);
+          // setCookie("forecastCurrently", JSON.stringify(result.currently), 3600);
+          // setCookie("forecastDaily", JSON.stringify(result.daily.data), 3600);
+          getCityState(lat, lon, function (value) {
+            $(".weather-location").html('<i class="icon ion-location"></i> ' + value);
+          })
           prepareDOM(result);
         },
         complete: function(){
@@ -117,7 +110,7 @@ function getWeather(position, city) {
   })
 };
 
-var prepareDOM = function (result) {
+function prepareDOM (result) {
   var currentWeather = result.currently;
   var weatherIcon = $(getWeatherIcon(currentWeather.icon)).attr('title', currentWeather.summary);
   // console.log(weatherIcon[0].outerHTML);
@@ -127,7 +120,6 @@ var prepareDOM = function (result) {
   $(".weather-value").html(celsiusFromFahrenheit(currentWeather.temperature) + '° C');
   $(".weather-icon").html(weatherIcon[0].outerHTML);
   $(".weather-text").html(currentWeather.summary);
-  $(".weather-location").html('<i class="icon ion-location"></i> ' + result.timezone);
   $(".forecast ul").html("");
 
   var forecastWeathers = result.daily.data;
@@ -149,58 +141,43 @@ var prepareDOM = function (result) {
   }
 }
 
-var setCookie = function (key, value, expiration) {
+function setCookie (name, value, expiration) {
+  console.log((new Date().getTime()/1000) + expiration)
   chrome.cookies.set({
-    "name" : key,
+    "name" : name,
     "url" : "http://developer.chrome.com/extensions/cookies.html",
     "value": value,
-    // "expirationDate": expiration
+    "expirationDate": (new Date().getTime()/1000) + + expiration
   }, function (cookie) {
-    console.log("Set cookie key :" + key + " - value :" + JSON.stringify(cookie));
+    console.log("Set cookie name :" + name + " - value :" + JSON.stringify(cookie));
     // console.log(chrome.extension.lastError);
     // console.log(chrome.runtime.lastError);
   });
 }
-var getCookie = function (key, callback) {
 
-  // var getCookieValue= "";
+function getCookie (name, callback) {
    chrome.cookies.get({
-    "name": key,
+    "name": name,
     "url" : "http://developer.chrome.com/extensions/cookies.html",
   }, function (cookie) {
-    if (callback) {
-      if (cookie == null)
-        callback(undefined);
-      else
-        callback(cookie.value);
-    }
-    // console.log(cookie.value);
-    // // console.log("Get cookie value :" + JSON.stringify(cookie));
-    // getCookieValue = cookie;
-    // return cookie;
+    callback(undefined, cookie && cookie.value)
   })
-  // console.log("" + getCookieValue);
-  // return getCookieValue;
 }
 
-var getCurrentLocation = function () {
-  var locationName = "";
+function getCurrentLocation (callback) {
 	navigator.geolocation.getCurrentPosition(function(location) {
-		var latitude = location.coords.latitude;
-		var longitude = location.coords.longitude;
-   locationName = getCityState(latitude, longitude);
-    // console.log(locationName);
-    // return locationName;
+    callback(location)
 	});
-  return locationName;
-};
+}
 
-var getCityState = function(latitude, longitude){
+function getCityState (latitude, longitude, callback){
   var locationUrl = 'https://maps.googleapis.com/maps/api/geocode/json?sensor=true&latlng=' + latitude + ',' + longitude;
 
-  var locationName = 'Unknown location...';
   $.get(locationUrl, function(data) {
     // console.log(data);
+
+    var locationName = 'Unknown location...';
+
     var state, city;
     var result = data.results[0];
 
@@ -211,13 +188,10 @@ var getCityState = function(latitude, longitude){
         if (ac.types.indexOf('administrative_area_level_1') >= 0) state = ac.short_name;
       }
       locationName = (city ? city : '') + (city && state ? ', ' : '') + (state ? state : '');
-    } else {
-      latitude = 41.0336472;
-      longitude = 28.863523;
+      callback(locationName)
     }
   });
-  return locationName;
-};
+}
 
 function convertDateFromTimestamp(timestamp)
 {
@@ -234,8 +208,8 @@ function getDayName(date)
 
 function celsiusFromFahrenheit(fahrenheit)
 {
-    var c = Math.round((Number(fahrenheit) - 32.0) * 5.0/9.0) // convert to Celsius
-    return c;
+  var c = Math.round((Number(fahrenheit) - 32.0) * 5.0/9.0) // convert to Celsius
+  return c;
 }
 
 function getWeatherIcon(iconText){
@@ -285,103 +259,103 @@ function getWeatherIcon(iconText){
 }
 
 function setWeatherIcon(condid) {
-
+  var icon;
   switch(condid) {
-    case '0': var icon  = '<i class="wi wi-tornado"></i>';
+    case '0': icon  = '<i class="wi wi-tornado"></i>';
     break;
-    case '1': var icon  = '<i class="wi wi-storm-showers"></i>';
+    case '1': icon  = '<i class="wi wi-storm-showers"></i>';
     break;
-    case '2': var icon  = '<i class="wi wi-tornado"></i>';
+    case '2': icon  = '<i class="wi wi-tornado"></i>';
     break;
-    case '3': var icon  = '<i class="wi wi-thunderstorm"></i>';
+    case '3': icon  = '<i class="wi wi-thunderstorm"></i>';
     break;
-    case '4': var icon  = '<i class="wi wi-thunderstorm"></i>';
+    case '4': icon  = '<i class="wi wi-thunderstorm"></i>';
     break;
-    case '5': var icon  = '<i class="wi wi-snow"></i>';
+    case '5': icon  = '<i class="wi wi-snow"></i>';
     break;
-    case '6': var icon  = '<i class="wi wi-rain-mix"></i>';
+    case '6': icon  = '<i class="wi wi-rain-mix"></i>';
     break;
-    case '7': var icon  = '<i class="wi wi-rain-mix"></i>';
+    case '7': icon  = '<i class="wi wi-rain-mix"></i>';
     break;
-    case '8': var icon  = '<i class="wi wi-sprinkle"></i>';
+    case '8': icon  = '<i class="wi wi-sprinkle"></i>';
     break;
-    case '9': var icon  = '<i class="wi wi-sprinkle"></i>';
+    case '9': icon  = '<i class="wi wi-sprinkle"></i>';
     break;
-    case '10': var icon  = '<i class="wi wi-hail"></i>';
+    case '10': icon  = '<i class="wi wi-hail"></i>';
     break;
-    case '11': var icon  = '<i class="wi wi-showers"></i>';
+    case '11': icon  = '<i class="wi wi-showers"></i>';
     break;
-    case '12': var icon  = '<i class="wi wi-showers"></i>';
+    case '12': icon  = '<i class="wi wi-showers"></i>';
     break;
-    case '13': var icon  = '<i class="wi wi-snow"></i>';
+    case '13': icon  = '<i class="wi wi-snow"></i>';
     break;
-    case '14': var icon  = '<i class="wi wi-storm-showers"></i>';
+    case '14': icon  = '<i class="wi wi-storm-showers"></i>';
     break;
-    case '15': var icon  = '<i class="wi wi-snow"></i>';
+    case '15': icon  = '<i class="wi wi-snow"></i>';
     break;
-    case '16': var icon  = '<i class="wi wi-snow"></i>';
+    case '16': icon  = '<i class="wi wi-snow"></i>';
     break;
-    case '17': var icon  = '<i class="wi wi-hail"></i>';
+    case '17': icon  = '<i class="wi wi-hail"></i>';
     break;
-    case '18': var icon  = '<i class="wi wi-hail"></i>';
+    case '18': icon  = '<i class="wi wi-hail"></i>';
     break;
-    case '19': var icon  = '<i class="wi wi-cloudy-gusts"></i>';
+    case '19': icon  = '<i class="wi wi-cloudy-gusts"></i>';
     break;
-    case '20': var icon  = '<i class="wi wi-fog"></i>';
+    case '20': icon  = '<i class="wi wi-fog"></i>';
     break;
-    case '21': var icon  = '<i class="wi wi-fog"></i>';
+    case '21': icon  = '<i class="wi wi-fog"></i>';
     break;
-    case '22': var icon  = '<i class="wi wi-fog"></i>';
+    case '22': icon  = '<i class="wi wi-fog"></i>';
     break;
-    case '23': var icon  = '<i class="wi wi-cloudy-gusts"></i>';
+    case '23': icon  = '<i class="wi wi-cloudy-gusts"></i>';
     break;
-    case '24': var icon  = '<i class="wi wi-cloudy-windy"></i>';
+    case '24': icon  = '<i class="wi wi-cloudy-windy"></i>';
     break;
-    case '25': var icon  = '<i class="wi wi-thermometer"></i>';
+    case '25': icon  = '<i class="wi wi-thermometer"></i>';
     break;
-    case '26': var icon  = '<i class="wi wi-cloudy"></i>';
+    case '26': icon  = '<i class="wi wi-cloudy"></i>';
     break;
-    case '27': var icon  = '<i class="wi wi-night-cloudy"></i>';
+    case '27': icon  = '<i class="wi wi-night-cloudy"></i>';
     break;
-    case '28': var icon  = '<i class="wi wi-day-cloudy"></i>';
+    case '28': icon  = '<i class="wi wi-day-cloudy"></i>';
     break;
-    case '29': var icon  = '<i class="wi wi-night-cloudy"></i>';
+    case '29': icon  = '<i class="wi wi-night-cloudy"></i>';
     break;
-    case '30': var icon  = '<i class="wi wi-day-cloudy"></i>';
+    case '30': icon  = '<i class="wi wi-day-cloudy"></i>';
     break;
-    case '31': var icon  = '<i class="wi wi-night-clear"></i>';
+    case '31': icon  = '<i class="wi wi-night-clear"></i>';
     break;
-    case '32': var icon  = '<i class="wi wi-day-sunny"></i>';
+    case '32': icon  = '<i class="wi wi-day-sunny"></i>';
     break;
-    case '33': var icon  = '<i class="wi wi-night-clear"></i>';
+    case '33': icon  = '<i class="wi wi-night-clear"></i>';
     break;
-    case '34': var icon  = '<i class="wi wi-day-sunny-overcast"></i>';
+    case '34': icon  = '<i class="wi wi-day-sunny-overcast"></i>';
     break;
-    case '35': var icon  = '<i class="wi wi-hail"></i>';
+    case '35': icon  = '<i class="wi wi-hail"></i>';
     break;
-    case '36': var icon  = '<i class="wi wi-day-sunny"></i>';
+    case '36': icon  = '<i class="wi wi-day-sunny"></i>';
     break;
-    case '37': var icon  = '<i class="wi wi-thunderstorm"></i>';
+    case '37': icon  = '<i class="wi wi-thunderstorm"></i>';
     break;
-    case '38': var icon  = '<i class="wi wi-thunderstorm"></i>';
+    case '38': icon  = '<i class="wi wi-thunderstorm"></i>';
     break;
-    case '39': var icon  = '<i class="wi wi-thunderstorm"></i>';
+    case '39': icon  = '<i class="wi wi-thunderstorm"></i>';
     break;
-    case '40': var icon  = '<i class="wi wi-storm-showers"></i>';
+    case '40': icon  = '<i class="wi wi-storm-showers"></i>';
     break;
-    case '41': var icon  = '<i class="wi wi-snow"></i>';
+    case '41': icon  = '<i class="wi wi-snow"></i>';
     break;
-    case '42': var icon  = '<i class="wi wi-snow"></i>';
+    case '42': icon  = '<i class="wi wi-snow"></i>';
     break;
-    case '43': var icon  = '<i class="wi wi-snow"></i>';
+    case '43': icon  = '<i class="wi wi-snow"></i>';
     break;
-    case '44': var icon  = '<i class="wi wi-cloudy"></i>';
+    case '44': icon  = '<i class="wi wi-cloudy"></i>';
     break;
-    case '45': var icon  = '<i class="wi wi-lightning"></i>';
+    case '45': icon  = '<i class="wi wi-lightning"></i>';
     break;
-    case '46': var icon  = '<i class="wi wi-snow"></i>';
+    case '46': icon  = '<i class="wi wi-snow"></i>';
     break;
-    case '47': var icon  = '<i class="wi wi-thunderstorm"></i>';
+    case '47': icon  = '<i class="wi wi-thunderstorm"></i>';
     break;
     case '3200': icon  =  '<i class="wi wi-cloud"></i>';
     break;

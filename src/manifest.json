@@ -14,7 +14,7 @@
   "content_security_policy": "script-src 'self' https://ssl.google-analytics.com https://api.darksky.net/; object-src 'self'",
   "browser_action": {
     "default_icon": { "38": "images/icon38.png" },
-    "default_title": "Weather Extension",
+    "default_title": "Weather IO Extension",
     "default_popup": "html/popup.html"
   },
   "permissions": [
