@@ -60,10 +60,8 @@ function getWeather(position, city) {
     var lon = position.coords.longitude;
 
   getCookie("forecast", function(error, value) {
-    console.log("Get cookie : " + value);
-    console.log("Value" + !value);
-
-    if(value !== undefined && value !== null)
+     if (!value) throw err
+    if(value)
     {
       // console.log("Get cookie value :" + JSON.parse(forecastCookie));
       prepareDOM(JSON.parse(value));
