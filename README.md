@@ -1,6 +1,7 @@
-# Weather IO
-The simpliest way to check forecast weather results
-A weather extension for Chrome
+# Weather IO*
+
+> The simplest way to check forecast weather results.
+> * A weather extension for Chrome
 
 ![Screenshot](https://github.com/abdurrahman/weather-extension/raw/master/src/images/weather-extension-ss.jpg)
 
