@@ -11,13 +11,18 @@
   "default_locale": "en",
   "background": {
     "persistent": true,
-    "scripts": ["scripts/background.js"]
+    "scripts": ["scripts/vendor/jquery-1.11.0.min.js","scripts/common.js","scripts/background.js"]
   },
   "content_security_policy": "script-src 'self' https://ssl.google-analytics.com https://api.darksky.net/; object-src 'self'",
   "browser_action": {
     "default_icon": { "38": "images/icon38.png" },
     "default_title": "Weather IO Extension",
     "default_popup": "popup.html"
+  },
+  "options_page": "settings.html",
+  "options_ui": {
+    "page": "settings.html",
+    "chrome_style": true
   },
   "permissions": [
     "geolocation",

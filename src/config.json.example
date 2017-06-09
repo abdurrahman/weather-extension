@@ -1,0 +1,4 @@
+{
+  "weatherApi": "https://api.darksky.net/forecast/",
+  "apiKey": "your api key"
+}
