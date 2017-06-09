@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Weather IO - Settings</title>
+    </head>
+<body>
+    <div class="container">
+        <strong>Welcome to Weather IO</strong>
+        <div>
+            <h2>Units</h2>
+            <select name="units" id="units">
+                <option value="f">Fahrenheit</option>
+                <option value="c">Celsius</option>
+            </select>
+        </div>
+        <div>
+            <button id="save" onclick="settings.onSave();">Save Settings</button>
+        </div>
+    </div>
+    <script src="scripts/vendor/jquery-1.11.0.min.js"></script>
+    <script src="scripts/settings.js"></script>
+</body>
+</html>
