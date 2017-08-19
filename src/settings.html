@@ -2,22 +2,35 @@
 <html>
     <head>
         <title>Weather IO - Settings</title>
+        <link rel="stylesheet" type="text/css" href="styles/normalize.css">
+        <link rel="stylesheet" type="text/css" href="styles/setting.css"/>
     </head>
-<body>
-    <div class="container">
-        <strong>Welcome to Weather IO</strong>
-        <div>
-            <h2>Units</h2>
-            <select name="units" id="units">
-                <option value="f">Fahrenheit</option>
-                <option value="c">Celsius</option>
-            </select>
+    <body>
+        <div class="container">
+            <h1>
+                <div id="settings-header"></div>
+            </h1>
+            <div class="option-row">
+                <div id="units-label" class="option-name"></div>
+                <div class="option-picker select">
+                    <label>
+                        <input type="radio" name="units" value="f" />
+                        Fahrenheit
+                    </label>
+                    <label>
+                        <input type="radio" name="units" value="c" />
+                        Celsius
+                    </label>
+                </div>
+            </div>
+            <div class="buttons">
+                <button id="save" class="small color blue button">Save</button>
+                <button id="reset" class="small button">Reset</button>
+                <span id="status" style="display:none"></span>
+            </div>
+        <script src="scripts/vendor/jquery-1.11.0.min.js"></script>
+        <script src="scripts/common.js"></script>
+        <script src="scripts/settings.js"></script>
         </div>
-        <div>
-            <button id="save" onclick="settings.onSave();">Save Settings</button>
-        </div>
-    </div>
-    <script src="scripts/vendor/jquery-1.11.0.min.js"></script>
-    <script src="scripts/settings.js"></script>
-</body>
+    </body>
 </html>
