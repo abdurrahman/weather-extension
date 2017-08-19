@@ -1,14 +1,25 @@
 'use strict';
 
-$(document).ready(function() {
-   $(".container").hide();
-   //
-   weatherExtension.getCurrentLocation(function(value) {
-     if (!value) throw err
 
-     if (value) {
-      //  weatherExtension.onUpdateBadge(value)
-       weatherExtension.getWeather(value, 'New York');
+$(function() {
+   $(".container").hide();
+
+  //  $.getJSON('/config.json', function(res){
+  //     console.log(res)
+  //  });
+   getCurrentLocation(function(position) {
+     if (!position) throw err
+
+     if (position) {
+      // console.log(position.coords);       
+      var lat = position.coords.latitude;
+      var lon = position.coords.longitude;
+
+      getLocationName(lat, lon, function(cityName){
+        console.log(cityName); 
+        var coords = lat + "," + lon;
+        weatherExtension.getWeather(coords, cityName);
+      })
      }
    })
 
@@ -176,42 +187,34 @@ var weatherExtension = (function(){
     return icon;
   };
 
-  var getCityState = function (latitude, longitude, callback){
-    var locationUrl = 'https://maps.googleapis.com/maps/api/geocode/json?sensor=true&latlng=' + latitude + ',' + longitude;
-
-    $.get(locationUrl, function(data) {
-      // console.log(data);
-
-      var locationName = 'Unknown location...';
-
-      var state, city;
-      var result = data.results[0];
-
-      if (result && result.address_components) {
-        for (var i = 0; i < result.address_components.length; i++) {
-          var ac = result.address_components[i];
-          if (ac.types.indexOf('locality') >= 0) city = ac.long_name;
-          if (ac.types.indexOf('administrative_area_level_1') >= 0) state = ac.short_name;
-        }
-        locationName = (city ? city : '') + (city && state ? ', ' : '') + (state ? state : '');
-        callback(locationName)
-      }
-    });
-  };
-
   var prepareDOM = function(result) {
     var currentWeather = result.currently;
     var weatherIcon = $(getWeatherIcon(currentWeather.icon)).attr('title', currentWeather.summary);
     // console.log(weatherIcon[0].outerHTML);
     var currentDate = convertDateFromTimestamp(currentWeather.time);
+    
+    var units = localStorage._units;
 
     $(".weather-date").html('<i class="icon ion-calendar"></i> ' + currentDate.toDateString());
-    $(".weather-value").html(celsiusFromFahrenheit(currentWeather.temperature) + '° C');
+
+    var weatherValue = "";
+    if(units && units == "c")
+      weatherValue = celsiusFromFahrenheit(currentWeather.temperature) + '° C';
+    else
+      weatherValue = currentWeather.temperature + '° F';
+
+    $(".weather-value").html(weatherValue);
     $(".weather-icon").html(weatherIcon[0].outerHTML);
     $(".weather-text").html(currentWeather.summary);
     $(".forecast ul").html("");
-
+    
     var forecastWeathers = result.daily.data;
+    if(units && units == "c")
+      forecastWeathers.map(function(temp,index){
+        temp.temperatureMin = Math.round((Number(temp.temperatureMin) - 32.0) * 5.0/9.0);
+        temp.temperatureMax = Math.round((Number(temp.temperatureMax) - 32.0) * 5.0/9.0);
+      })
+   
     for (var i=0; i < forecastWeathers.length; i++){
       if (i == 0)
         continue;
@@ -225,67 +228,54 @@ var weatherExtension = (function(){
       $(".forecast ul").append("<li><div>" +
         "<span>"+ weatherIcon[0].outerHTML + "</span>" +
         "<span>" + forecastDay + "</span>" +
-        "<span>" + celsiusFromFahrenheit(forecastWeather.temperatureMin) + " / " + celsiusFromFahrenheit(forecastWeather.temperatureMax) + " °C</span>" +
+        "<span>" + forecastWeather.temperatureMin + " / " + forecastWeather.temperatureMax + " °C</span>" +
       "</div></li>")
     }
   };
 
-  var getWeather = function (position, city) {
+  var getWeather = function (coords, locationName) {
 
-    var lat = position.coords.latitude;
-    var lon = position.coords.longitude;
+    $.getJSON('/config.json', function(config){
+      var forecastUrl = config.weatherApi + config.apiKey + "/" + coords + "?lang=tr"
 
-    // getCookie("forecast", function(error, value) {
-    //   if (!value) throw err
-    //   if(value)
-    //   {
-    //     // console.log("Get cookie value :" + JSON.parse(forecastCookie));
-    //     prepareDOM(JSON.parse(value));
+      getWeatherFromApi(config.weatherApi + config.apiKey, coords,"tr","", function(result){
+        if (!result) throw err
 
-    //     getCityState(lat, lon, function (value) {
-    //       $(".weather-location").html('<i class="icon ion-location"></i> ' + value);
-    //     })
-    //     $(".sk-cube-grid").hide();
-    //     $(".container").show();
-    //   }
-    //   else {
+        if(result){
+          //setCookie("forecast", JSON.stringify(result), 3600);
+          //setCookie("forecastCurrently", JSON.stringify(result.currently), 3600);
+          //setCookie("forecastDaily", JSON.stringify(result.daily.data), 3600);
+          $(".weather-location").html('<i class="icon ion-location"></i> ' + locationName);
+          prepareDOM(result);
+          $(".sk-cube-grid").hide();
+          $(".container").show();
+        }
+      });
+      
+        // $.ajax({
+        //   type: "GET",
+        //   url: forecastUrl,
+        //   contentType: "application/json; charset=utf-8",
+        //   dataType: "json",
+        //   beforeSend: function(){
+        //     $(".sk-cube-grid").show();
+        //   },
+        //   success: function(result){
+        //     console.log(result);
+            
+        //     $(".weather-location").html('<i class="icon ion-location"></i> ' + locationName);
+        //     prepareDOM(result);
+        //   },
+        //   complete: function(){
+        //     $(".sk-cube-grid").hide();
+        //     $(".container").show();
+        //   }
+        // });
 
-        // Forming the query for Dark Sky weather forecasting API
-        // https://api.darksky.net/forecast/[key]/[latitude],[longitude]
-        var baseApiUri = "https://api.darksky.net/forecast/";
-        var apiKey = "65add8d78a15cb6f9b38a2065fadbe4f";
-        var coords = lat + "," + lon;
-
-        $.ajax({
-          type: "GET",
-          url: baseApiUri + apiKey + "/" + coords,
-          contentType: "application/json; charset=utf-8",
-          dataType: "json",
-          beforeSend: function(){
-            $(".sk-cube-grid").show();
-          },
-          success: function(result){
-            // console.log(result);
-          // setCookie("forecast", JSON.stringify(result), 3600);
-            // setCookie("forecastCurrently", JSON.stringify(result.currently), 3600);
-            // setCookie("forecastDaily", JSON.stringify(result.daily.data), 3600);
-            getCityState(lat, lon, function (value) {
-              $(".weather-location").html('<i class="icon ion-location"></i> ' + value);
-            })
-            prepareDOM(result);
-          },
-          complete: function(){
-            $(".sk-cube-grid").hide();
-            $(".container").show();
-          }
-        });
-
-    //   }
-    // })
+     });
   };
 
   return {
-    getCurrentLocation: getCurrentLocation,
     getWeather: getWeather
   }
 })();

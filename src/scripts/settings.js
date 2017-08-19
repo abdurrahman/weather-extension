@@ -22,7 +22,7 @@ var settings = function(){
         $('#units-label').text(unitLabel);
         $('#save').text(saveText);
         $('#reset').text(resetText);
-        $("input[name=units]:checked").val(localStorage._units);
+        $("input[name='units']").val(localStorage._units);
     }
 
     var onSave = function(){
@@ -45,6 +45,7 @@ var settings = function(){
 
     var onReset = function() {
         localStorage.removeItem('_units');
+        chrome.storage.local.remove('forecast');
     }
 
     return {

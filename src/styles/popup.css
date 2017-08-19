@@ -66,7 +66,7 @@ i.icon, i.wi {
   margin: 5px 0;
 }
 
-..weather-date {
+.weather-date {
   font-size: 17px;
 }
 
@@ -130,7 +130,7 @@ i.icon, i.wi {
 
 .forecast ul li div span {
   margin-right: 25px;
-  font-size: 15px
+  font-size: 12px
 }
 
 .forecast ul li div span:last-child {

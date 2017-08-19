@@ -29,31 +29,7 @@ window.onUpdateBadge = function (position) {
             setBadgeText(units,result.currently.temperature);
         }
     });
-
-
-    // chrome.storage.local.get('forecast', function(res){
-    //   debugger;
-    //   console.log(res);
-    //   if(res && res.currently){
-    //     setBadgeText(units, result.currently.temperature);
-    //   } else {
-    //     $.ajax({
-    //       type: "GET",
-    //       url: baseApiUri + apiKey + "/" + coords + "?lang=tr&units=ca",
-    //       headers: {
-    //         'Content-Type': 'application/x-www-form-urlencoded'
-    //       },
-    //       contentType: "application/json; charset=utf-8",
-    //       dataType: "jsonp",
-    //       success: function(result) {
-    //         debugger;
-    //         console.log(result);
-    //         chrome.storage.local.set({ forecast: result});
-    //         setBadgeText(units,result.currently.temperature);
-    //       }
-    //     });
-    //   }  
-    // });
+    
   });
 };
 
@@ -68,14 +44,14 @@ var setBadgeText = function(units, temperature){
 };
 
 chrome.alarms.onAlarm.addListener(function(alarm){
-    getCurrentLocation(function(value) {
-     if (!value) throw err
+    getCurrentLocation(function(position) {
+     if (!position) throw err
 
-     if (value) {
-       onUpdateBadge(value);
+     if (position) {
+       onUpdateBadge(position);
      }
    });
     console.log("Got an alarm!", alarm);
 });
 chrome.alarms.clear('onUpdateBadge');
-chrome.alarms.create('onUpdateBadge', { periodInMinutes: 1});
+chrome.alarms.create('onUpdateBadge', { periodInMinutes: 60});
