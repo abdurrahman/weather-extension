@@ -22,7 +22,7 @@ var settings = function(){
         $('#units-label').text(unitLabel);
         $('#save').text(saveText);
         $('#reset').text(resetText);
-        $('#units').val(localStorage._units);
+        $("input[name=units]:checked").val(localStorage._units);
     }
 
     var onSave = function(){
