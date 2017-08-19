@@ -6,5 +6,19 @@
   "appDescription": {
     "message": "Hava tahmin sonuçlarını kontrol etmenin en basit yolu.",
     "description": "The description of the application"
+  },
+  "units":{
+    "message": "Birimler",
+    "description": "Units of measurements"
+  },
+  "settingsHeader": {
+    "message": "Weather IO Eklenti Ayarları",
+    "description": "The header of settings page"
+  },
+  "save": {
+    "message": "Kaydet"
+  },
+  "reset":{
+    "message": "Sıfırla"
   }
 }
